@@ -2,7 +2,7 @@
 
 > Minimalistic GUI app listening to iSpindel devices, to allow easy configuration and calibration.
 
-IMAGE
+![Screenshot](https://raw.githubusercontent.com/plut0nium/iSpindelTool/master/doc/Screenshot_2019-08-20_212508.png)
 
 The use case of this script/app is very simple: I had to build and configure 10+ iSpindel electronic hydrometers for my local homebrewer association.
 Rather than switching from one device to another in configuration mode, or configuring all devices to upload to an IoT cloud service (Ubidots, Brewspy...),
