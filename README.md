@@ -1,6 +1,6 @@
 # iSpindelTool 🍺
 
-> Minimalistic GUI app listening to iSpindel devices, to allow easy configuration and calibration.
+> Minimalistic GUI app listening to [iSpindel](https://github.com/universam1/iSpindel) electronic hydrometers, to allow easy testing and calibration.
 
 ![Screenshot](https://raw.githubusercontent.com/plut0nium/iSpindelTool/master/doc/Screenshot_2019-08-20_212508.png)
 
@@ -23,6 +23,11 @@ It is recommended to set a low update interval (10-30s) for testing purpose.
 Run the app on your computer.
 
 Each iSpindel should appear in the Treeview as a node, and all transmitted parameters as children.
+
+## Credits
+
+* iSpindel project: [universam1/iSpindel](https://github.com/universam1/iSpindel)
+* iSpindel TCP server: [DottoreTozzi/iSpindel-TCP-Server](https://github.com/DottoreTozzi/iSpindel-TCP-Server)
 
 ## License
 
