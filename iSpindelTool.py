@@ -49,7 +49,7 @@ data_queue = queue.SimpleQueue()
 
 # logging
 log = logging.getLogger(__name__)
-log.setLevel(logging.ERROR) # reduce to INFO or DEBUG for more verbose
+log.setLevel(logging.INFO) # reduce to INFO or DEBUG for more verbose
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # log to console
 ch = logging.StreamHandler(sys.stdout)
@@ -68,14 +68,14 @@ class ISpindelTCPHandler(socketserver.StreamRequestHandler):
         If not, send NAK
         """
         self.data = self.rfile.readline().strip()
-        log.debug("{} wrote: {}".format(self.client_address[0], self.data.decode()))
+        log.debug("[RAW] {} wrote: {}".format(self.client_address[0], self.data.decode()))
         try:
             ispindel_data = json.loads(self.data.decode())
-            log.info("[JSON] received: {}".format(ispindel_data))
+            log.info("[JSON] received from {}: \n{}".format(self.client_address[0], ispindel_data))
             data_queue.put((datetime.now().isoformat(' ', 'seconds'), ispindel_data))
             self.wfile.write(ACK)
         except json.JSONDecodeError as e:
-            log.error("[JSON]", e)
+            log.error("[JSON] DecodeError:", e)
             self.wfile.write(NAK)
 
 
@@ -162,6 +162,8 @@ class ISpindelGUI(ttk.Frame):
 
 
 if __name__ == "__main__":
+    log.info("*** Welcome to {}".format(APP_NAME))
+        
     tk_root = tk.Tk()
     tk_root.title(APP_NAME)
 
