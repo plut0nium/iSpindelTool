@@ -122,18 +122,18 @@ class ISpindelQueueHandler(Thread):
             else:
                 sleep(1)
                 continue
-            device_id = ".".format(ispindel_data["name"], ispindel_data["ID"])
+            device_id = "{}.{}".format(ispindel_data["name"], ispindel_data["ID"])
             if not app.treeview.exists(device_id):
                 # new device
                 app.treeview.insert("", "end", iid=device_id, text="{} [{}]".format(ispindel_data["name"], ispindel_data["ID"]), tags=('device'))
                 for parameter, value in ispindel_data.items():
-                    app.treeview.insert(device_id, "end", iid=device_id+"."+parameter, text=parameter, values=(value))
-                app.treeview.insert(device_id, "end", iid=device_id+".time", text="Last update", values=(time,)) # comma is used to avoid considering the string as an iterable
+                    app.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, parameter), text=parameter, values=(value))
+                app.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, "time"), text="Last update", values=(time,)) # comma is used to avoid considering the string as an iterable
             else:
                 # known device - update values
                 for parameter, value in ispindel_data.items():
-                    app.treeview.item(device_id+"."+parameter, values=(value))
-                app.treeview.item(device_id+".time", values=(time,))
+                    app.treeview.item("{}.{}".format(device_id, parameter), values=(value))
+                app.treeview.item("{}.{}".format(device_id, "time"), values=(time,))
 
     def stop(self):
         log.info("Stopping Queue Handler")
