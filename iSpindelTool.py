@@ -71,7 +71,7 @@ class ISpindelTCPHandler(socketserver.StreamRequestHandler):
         log.debug("[RAW] {} wrote: {}".format(self.client_address[0], self.data.decode()))
         try:
             ispindel_data = json.loads(self.data.decode())
-            log.info("[JSON] received from {}: \n{}".format(self.client_address[0], ispindel_data))
+            log.info("[JSON] received from {}: {}".format(self.client_address[0], ispindel_data))
             data_queue.put((datetime.now().isoformat(' ', 'seconds'), ispindel_data))
             self.wfile.write(ACK)
         except json.JSONDecodeError as e:
@@ -103,19 +103,20 @@ class ISpindelQueueHandler(Thread):
     If data is added to the queue, it is used to update the device
     representation in the Treeview.
     """
-    def __init__(self, data_queue):
+    def __init__(self, data_queue, treeview):
         Thread.__init__(self)
-        self._queue = data_queue
-        self._stop = False
+        self.queue = data_queue
+        self.treeview = treeview
+        self.stop = False
 
     def run(self):
         log.info("Starting Queue Handler")
         ispindel_data = {}
-        while not self._stop:
-            if not self._queue.empty():
+        while not self.stop:
+            if not self.queue.empty():
                 log.debug("Something in the queue \o/")
                 try:
-                    time, ispindel_data = self._queue.get(block=False)
+                    time, ispindel_data = self.queue.get(block=False)
                 except queue.Empty:
                     log.error("Nothing found in the queue")
                     continue
@@ -123,21 +124,21 @@ class ISpindelQueueHandler(Thread):
                 sleep(1)
                 continue
             device_id = "{}.{}".format(ispindel_data["name"], ispindel_data["ID"])
-            if not app.treeview.exists(device_id):
+            if not self.treeview.exists(device_id):
                 # new device
-                app.treeview.insert("", "end", iid=device_id, text="{} [{}]".format(ispindel_data["name"], ispindel_data["ID"]), tags=('device'))
+                self.treeview.insert("", "end", iid=device_id, text="{} [{}]".format(ispindel_data["name"], ispindel_data["ID"]), tags=('device'))
                 for parameter, value in ispindel_data.items():
-                    app.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, parameter), text=parameter, values=(value))
-                app.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, "time"), text="Last update", values=(time,)) # comma is used to avoid considering the string as an iterable
+                    self.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, parameter), text=parameter, values=(value))
+                self.treeview.insert(device_id, "end", iid="{}.{}".format(device_id, "time"), text="Last update", values=(time,)) # comma is used to avoid considering the string as an iterable
             else:
                 # known device - update values
                 for parameter, value in ispindel_data.items():
-                    app.treeview.item("{}.{}".format(device_id, parameter), values=(value))
-                app.treeview.item("{}.{}".format(device_id, "time"), values=(time,))
+                    self.treeview.item("{}.{}".format(device_id, parameter), values=(value))
+                self.treeview.item("{}.{}".format(device_id, "time"), values=(time,))
 
     def stop(self):
         log.info("Stopping Queue Handler")
-        self._stop = True
+        self.stop = True
 
 
 class ISpindelGUI(ttk.Frame):
@@ -166,14 +167,14 @@ if __name__ == "__main__":
         
     tk_root = tk.Tk()
     tk_root.title(APP_NAME)
-
+    app = ISpindelGUI(tk_root)
+    
     server_thread = SocketServerThread((HOST, PORT), ISpindelTCPHandler)
     server_thread.start()
 
-    queue_handler_thread = ISpindelQueueHandler(data_queue)
+    queue_handler_thread = ISpindelQueueHandler(data_queue, app.treeview)
     queue_handler_thread.start()
 
-    app = ISpindelGUI(tk_root)
     app.mainloop()
 
 
