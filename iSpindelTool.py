@@ -107,12 +107,12 @@ class ISpindelQueueHandler(Thread):
         Thread.__init__(self)
         self.queue = data_queue
         self.treeview = treeview
-        self.stop = False
+        self._stop = False
 
     def run(self):
         log.info("Starting Queue Handler")
         ispindel_data = {}
-        while not self.stop:
+        while not self._stop:
             if not self.queue.empty():
                 log.debug("Something in the queue \o/")
                 try:
@@ -138,7 +138,7 @@ class ISpindelQueueHandler(Thread):
 
     def stop(self):
         log.info("Stopping Queue Handler")
-        self.stop = True
+        self._stop = True
 
 
 class ISpindelGUI(ttk.Frame):
